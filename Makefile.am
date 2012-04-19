@@ -24,7 +24,8 @@ pkginclude_HEADERS = \
 
 libcbio_la_CPPFLAGS = $(AM_CPPFLAGS) -DLIBCBIO_INTERNAL=1
 libcbio_la_SOURCES = src/document.c src/error.c src/instance.c src/internal.h
-libcbio_la_LDFLAGS = $(AM_LDFLAGS) -lcouchstore
+libcbio_la_LDFLAGS = $(AM_LDFLAGS) -lcouchstore \
+                     -version-info $(LIBCBIO_API_CURRENT):$(LIBCBIO_API_REVISION):$(LIBCBIO_API_AGE) -no-undefined
 
 check_PROGRAMS = tests/test_open_empty_filename \
                  tests/test_create_database tests/test_get_miss \

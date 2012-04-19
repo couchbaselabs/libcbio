@@ -1,0 +1,5 @@
+libcbio is a small client library that allows you to operate on a
+couchbase database file. It utilize the "couchstore" library to do the
+actual file io, but provides a clear programming interface to decouple
+the internals of couchstore from your application (and hence make the
+clients life easier to follow the changes in the library).

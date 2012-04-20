@@ -35,8 +35,10 @@ cbio_error_t cbio_open_handle(const char *name,
     ret->mode = mode;
     if (mode == CBIO_OPEN_RDONLY) {
         flags = COUCHSTORE_OPEN_FLAG_RDONLY;
-    } else {
+    } else if (CBIO_OPEN_CREATE) {
         flags = COUCHSTORE_OPEN_FLAG_CREATE;
+    } else {
+        flags = 0;
     }
 
     err = couchstore_open_db(name, flags, &ret->couchstore_handle);

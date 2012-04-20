@@ -78,7 +78,7 @@ static int create_database(void)
         return 1;
     }
 
-    err = cbio_open_handle(dbfile, CBIO_OPEN_RW, &handle);
+    err = cbio_open_handle(dbfile, CBIO_OPEN_CREATE, &handle);
     if (err != CBIO_SUCCESS) {
         report("Expected open of \"%s\" to succeed, but it \"%s\"",
                cbio_strerror(err));
@@ -103,7 +103,7 @@ static int get_miss(void)
     libcbio_document_t doc;
     cbio_error_t err;
 
-    err = cbio_open_handle(dbfile, CBIO_OPEN_RW, &handle);
+    err = cbio_open_handle(dbfile, CBIO_OPEN_CREATE, &handle);
     if (err != CBIO_SUCCESS) {
         report("Expected open of \"%s\" to succeed, but it \"%s\"",
                cbio_strerror(err));
@@ -127,7 +127,7 @@ static int store_document(void)
     libcbio_document_t doc;
     cbio_error_t err;
 
-    err = cbio_open_handle(dbfile, CBIO_OPEN_RW, &handle);
+    err = cbio_open_handle(dbfile, CBIO_OPEN_CREATE, &handle);
     if (err != CBIO_SUCCESS) {
         report("Expected open of \"%s\" to succeed, but it \"%s\"",
                cbio_strerror(err));
@@ -216,7 +216,7 @@ static int delete_document(void)
         return 1;
     }
 
-    err = cbio_open_handle(dbfile, CBIO_OPEN_RW, &handle);
+    err = cbio_open_handle(dbfile, CBIO_OPEN_CREATE, &handle);
     if (err != CBIO_SUCCESS) {
         report("Expected open of \"%s\" to succeed, but it \"%s\"",
                cbio_strerror(err));
@@ -271,7 +271,7 @@ static int delete_nonexistent_document(void)
     libcbio_document_t doc;
     cbio_error_t err;
 
-    err = cbio_open_handle(dbfile, CBIO_OPEN_RW, &handle);
+    err = cbio_open_handle(dbfile, CBIO_OPEN_CREATE, &handle);
     if (err != CBIO_SUCCESS) {
         report("Expected open of \"%s\" to succeed, but it \"%s\"",
                cbio_strerror(err));
@@ -378,7 +378,7 @@ static int bulk_store_documents(void)
     }
     libcbio_t handle;
 
-    err = cbio_open_handle(dbfile, CBIO_OPEN_RW, &handle);
+    err = cbio_open_handle(dbfile, CBIO_OPEN_CREATE, &handle);
     if (err != CBIO_SUCCESS) {
         report("Failed to open handle \"%s\"",
                cbio_strerror(err));
@@ -458,7 +458,7 @@ static int test_changes_since(void)
 {
     libcbio_t handle;
     cbio_error_t err;
-    err = cbio_open_handle(dbfile, CBIO_OPEN_RW, &handle);
+    err = cbio_open_handle(dbfile, CBIO_OPEN_CREATE, &handle);
     if (err != CBIO_SUCCESS) {
         report("Failed to open handle \"%s\"",
                cbio_strerror(err));

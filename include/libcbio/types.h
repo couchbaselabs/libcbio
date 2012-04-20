@@ -29,6 +29,23 @@
 extern "C" {
 #endif
 
+    /**< Document contents compressed via Snappy */
+#define CBIO_DOC_IS_COMPRESSED 128
+    /* Content Type Reasons (content_meta & 0x0F): */
+
+    /**< Document is valid JSON data */
+#define CBIO_DOC_IS_JSON  0
+
+ /**< Document was checked, and was not valid JSON */
+#define CBIO_DOC_INVALID_JSON  1
+
+    /**< Document was checked, and contained reserved keys,
+       was not inserted as JSON. */
+#define CBIO_DOC_INVALID_JSON_KEY 2
+
+    /**< Document was not checked (DB running in non-JSON mode) */
+#define CBIO_DOC_NON_JSON_MODE 3
+
     struct libcbio_st;
     typedef struct libcbio_st *libcbio_t;
 
@@ -37,7 +54,8 @@ extern "C" {
 
     typedef enum {
         CBIO_OPEN_RDONLY,
-        CBIO_OPEN_RW
+        CBIO_OPEN_RW,
+        CBIO_OPEN_CREATE
     } libcbio_open_mode_t;
 
     typedef enum {

@@ -90,6 +90,32 @@ LINTFLAGS=-Iinclude -b -c -errchk=%all \
 lint:
 	$(LINT.c) $(libcbio_la_SOURCES)
 
+VALGRIND=valgrind
+VALGRIND_OPTIONS=--tool=Memcheck --num-callers=50 \
+                 --error-limit=yes --track-origins=yes --malloc-fill=55 \
+                 --free-fill=aa --dsymutil=yes -q
+
+VALGRIND_TEST=tests/.libs/test_open_empty_filename              \
+              tests/.libs/test_create_database                  \
+              tests/.libs/test_get_miss                         \
+              tests/.libs/test_store_single_document            \
+              tests/.libs/test_get_hit                          \
+              tests/.libs/test_delete_document                  \
+              tests/.libs/test_delete_nonexistent_document      \
+              tests/.libs/test_get_deleted_document             \
+              tests/.libs/test_bulk_store_documents             \
+              tests/.libs/test_changes_since                    \
+              tests/.libs/test_local_documents
+
+valgrind: ${check_PROGRAMS}
+	@for f in $(VALGRIND_TEST); \
+        do \
+           LD_LIBRARY_PATH=`pwd`/.libs \
+           DYLD_LIBRARY_PATH=`pwd`/.libs \
+           echo Running Valgrind on $$f; \
+           $(VALGRIND) $(VALGRIND_OPTIONS) --log-file=`basename $$f`.log $$f; \
+        done
+
 reformat:
 	astyle --mode=c \
                --quiet \

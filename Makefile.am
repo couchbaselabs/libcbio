@@ -39,33 +39,43 @@ check_PROGRAMS = tests/test_open_empty_filename \
 TESTS=${check_PROGRAMS}
 
 tests_test_open_empty_filename_SOURCES = tests/testapp.c
+tests_test_open_empty_filename_DEPENDENCIES = libcbio.la
 tests_test_open_empty_filename_LDFLAGS = libcbio.la
 
 tests_test_create_database_SOURCES = tests/testapp.c
+tests_test_create_database_DEPENDENCIES = libcbio.la
 tests_test_create_database_LDFLAGS = libcbio.la
 
 tests_test_get_hit_SOURCES = tests/testapp.c
+tests_test_get_hit_DEPENDENCIES = libcbio.la
 tests_test_get_hit_LDFLAGS = libcbio.la
 
 tests_test_get_miss_SOURCES = tests/testapp.c
+tests_test_get_miss_DEPENDENCIES = libcbio.la
 tests_test_get_miss_LDFLAGS = libcbio.la
 
 tests_test_store_single_document_SOURCES = tests/testapp.c
+tests_test_store_single_document_DEPENDENCIES = libcbio.la
 tests_test_store_single_document_LDFLAGS = libcbio.la
 
 tests_test_delete_document_SOURCES = tests/testapp.c
+tests_test_delete_document_DEPENDENCIES = libcbio.la
 tests_test_delete_document_LDFLAGS = libcbio.la
 
 tests_test_delete_nonexistent_document_SOURCES = tests/testapp.c
+tests_test_delete_nonexistent_document_DEPENDENCIES = libcbio.la
 tests_test_delete_nonexistent_document_LDFLAGS = libcbio.la
 
 tests_test_get_deleted_document_SOURCES = tests/testapp.c
+tests_test_get_deleted_document_DEPENDENCIES = libcbio.la
 tests_test_get_deleted_document_LDFLAGS = libcbio.la
 
 tests_test_bulk_store_documents_SOURCES = tests/testapp.c
+tests_test_bulk_store_documents_DEPENDENCIES = libcbio.la
 tests_test_bulk_store_documents_LDFLAGS = libcbio.la
 
 tests_test_changes_since_SOURCES = tests/testapp.c
+tests_test_changes_since_DEPENDENCIES = libcbio.la
 tests_test_changes_since_LDFLAGS = libcbio.la
 
 

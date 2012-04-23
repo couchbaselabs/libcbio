@@ -501,6 +501,109 @@ static int test_changes_since(void)
     return 0;
 }
 
+static int test_local_documents(void)
+{
+    libcbio_t handle;
+    libcbio_document_t doc;
+    cbio_error_t err;
+    const char *key = "_local/hi-there";
+    size_t nkey = strlen(key);
+    const char *json = "{ foo:true }";
+    size_t njson = strlen(json);
+
+
+    err = cbio_open_handle(dbfile, CBIO_OPEN_CREATE, &handle);
+    if (err != CBIO_SUCCESS) {
+        report("Expected open of \"%s\" to succeed, but it \"%s\"",
+               cbio_strerror(err));
+        return 1;
+    }
+
+    err = cbio_get_document(handle, key, nkey, &doc);
+    if (err != CBIO_ERROR_ENOENT) {
+        report("I did not expect to find \"%s\" in the database"
+               ", but I got \"%s\"", key, cbio_strerror(err));
+        return 1;
+    }
+
+    err = cbio_create_empty_document(handle, &doc);
+    if (err != CBIO_SUCCESS) {
+        report("Failed to create an empty document: \"%s\"",
+               cbio_strerror(err));
+        return 1;
+    }
+
+    err = cbio_document_set_id(doc, key, nkey, 0);
+    if (err != CBIO_SUCCESS) {
+        report("Failed to set document id \"%s\"",
+               cbio_strerror(err));
+        return 1;
+    }
+
+    err = cbio_document_set_value(doc, json, njson, 0);
+    if (err != CBIO_SUCCESS) {
+        report("Failed ot set value \"%s\"",
+               cbio_strerror(err));
+        return 1;
+    }
+
+    err = cbio_store_document(handle, doc);
+    if (err != CBIO_SUCCESS) {
+        report("Failed to store document \"%s\"",
+               cbio_strerror(err));
+        return 1;
+    }
+
+    cbio_commit(handle);
+    cbio_document_release(doc);
+
+    err = cbio_get_document(handle, key, nkey, &doc);
+    if (err != CBIO_SUCCESS) {
+        report("The document should have been here now"
+               ", but I got \"%s\"", cbio_strerror(err));
+        return 1;
+    }
+
+    const void *res;
+    size_t nres;
+
+    err = cbio_document_get_value(doc, &res, &nres);
+    if (err != CBIO_SUCCESS) {
+        report("Failed to get the value: %s",
+               cbio_strerror(err));
+        return 1;
+    }
+
+    if (njson != nres) {
+        report("Received a different amount of data than I stored");
+        return 1;
+    }
+
+    if (memcmp(res, json, njson) != 0) {
+        report("Received incorrect data");
+        return 1;
+    }
+
+    cbio_document_set_deleted(doc, 1);
+    err = cbio_store_document(handle, doc);
+    if (err != CBIO_SUCCESS) {
+        report("Failed to store document \"%s\"",
+               cbio_strerror(err));
+        return 1;
+    }
+
+    cbio_document_release(doc);
+    err = cbio_get_document(handle, key, nkey, &doc);
+    if (err != CBIO_ERROR_ENOENT) {
+        report("I did not expect to find \"%s\" in the database"
+               ", but I got \"%s\"", key, cbio_strerror(err));
+        return 1;
+    }
+    cbio_close_handle(handle);
+
+    return 0;
+}
+
 static void remove_dbfiles(void)
 {
     if (remove(dbfile) == -1 && errno != ENOENT) {
@@ -529,6 +632,7 @@ static struct test tests[] = {
     { .name = "test_get_deleted_document", .func = get_deleted_document },
     { .name = "test_bulk_store_documents", .func = bulk_store_documents },
     { .name = "test_changes_since", .func = test_changes_since },
+    { .name = "test_local_documents", .func = test_local_documents },
     { .name = NULL, .func = NULL }
 };
 

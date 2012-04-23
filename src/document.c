@@ -101,7 +101,6 @@ cbio_error_t cbio_document_set_id(libcbio_document_t doc,
     return CBIO_SUCCESS;
 }
 
-
 LIBCBIO_API
 cbio_error_t cbio_document_set_meta(libcbio_document_t doc,
                                     const void *meta,

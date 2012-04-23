@@ -17,6 +17,17 @@
 #include "internal.h"
 
 #include <stdlib.h>
+#include <string.h>
+
+static int cbio_is_local_id(const void *data, size_t nb)
+{
+    return (nb > 6 && memcmp(data, "_local/", 7) == 0) ? 1 : 0;
+}
+
+static int cbio_is_local_document(DocInfo *info)
+{
+    return cbio_is_local_id(info->id.buf, info->id.size);
+}
 
 LIBCBIO_API
 cbio_error_t cbio_open_handle(const char *name,
@@ -68,12 +79,54 @@ off_t cbio_get_header_position(libcbio_t handle)
     return (off_t)couchstore_get_header_position(handle->couchstore_handle);
 }
 
+static cbio_error_t cbio_ldoc2doc(libcbio_t handle, const LocalDoc *ldoc, libcbio_document_t *doc)
+{
+    cbio_error_t e;
+
+    if ((e = cbio_create_empty_document(handle, doc)) == CBIO_SUCCESS &&
+        (e = cbio_document_set_id(*doc, ldoc->id.buf, ldoc->id.size, 1)) == CBIO_SUCCESS &&
+        (e = cbio_document_set_value(*doc, ldoc->json.buf, ldoc->json.size, 1)) == CBIO_SUCCESS &&
+        (e = cbio_document_set_deleted(*doc, ldoc->deleted)) == CBIO_SUCCESS) {
+        return CBIO_SUCCESS;
+    }
+
+    return e;
+}
+
+static cbio_error_t cbio_get_local_document(libcbio_t handle,
+                                            const void *id,
+                                            size_t nid,
+                                            libcbio_document_t *doc)
+{
+    couchstore_error_t err;
+    LocalDoc *ldoc;
+
+    err = couchstore_open_local_document(handle->couchstore_handle, id,
+                                         nid, &ldoc);
+    if (err == COUCHSTORE_SUCCESS) {
+        cbio_error_t ret;
+        if (ldoc->deleted) {
+            ret = CBIO_ERROR_ENOENT;
+        } else {
+            ret = cbio_ldoc2doc(handle, ldoc, doc);
+        }
+        couchstore_free_local_document(ldoc);
+        return ret;
+    }
+
+    return cbio_remap_error(err);
+}
+
 LIBCBIO_API
 cbio_error_t cbio_get_document(libcbio_t handle,
                                const void *id,
                                size_t nid,
                                libcbio_document_t *doc)
 {
+    if (cbio_is_local_id(id, nid)) {
+        return cbio_get_local_document(handle, id, nid, doc);
+    }
+
     libcbio_document_t ret = calloc(1, sizeof(*ret));
     couchstore_error_t err;
 
@@ -81,7 +134,9 @@ cbio_error_t cbio_get_document(libcbio_t handle,
         return CBIO_ERROR_ENOMEM;
     }
 
-    err = couchstore_docinfo_by_id(handle->couchstore_handle, id, nid, &ret->info);
+
+    err = couchstore_docinfo_by_id(handle->couchstore_handle, id,
+                                   nid, &ret->info);
     if (err != COUCHSTORE_SUCCESS) {
         cbio_document_release(ret);
         return cbio_remap_error(err);
@@ -109,6 +164,26 @@ cbio_error_t cbio_store_document(libcbio_t handle,
     return cbio_store_documents(handle, &doc, 1);
 }
 
+static cbio_error_t cbio_store_local_documents(libcbio_t handle,
+                                               libcbio_document_t *doc,
+                                               size_t ndocs)
+{
+    for (size_t ii = 0; ii < ndocs; ++ii) {
+        couchstore_error_t err;
+        LocalDoc mydoc;
+        mydoc.id = doc[ii]->info->id;
+        mydoc.json = doc[ii]->doc->data;
+        mydoc.deleted = doc[ii]->info->deleted;
+
+        err = couchstore_save_local_document(handle->couchstore_handle,
+                                             &mydoc);
+        if (err != COUCHSTORE_SUCCESS) {
+            return cbio_remap_error(err);
+        }
+    }
+    return CBIO_SUCCESS;
+}
+
 LIBCBIO_API
 cbio_error_t cbio_store_documents(libcbio_t handle,
                                   libcbio_document_t *doc,
@@ -119,8 +194,12 @@ cbio_error_t cbio_store_documents(libcbio_t handle,
     size_t ii;
     couchstore_error_t err;
 
-    if (handle->mode == CBIO_OPEN_RDONLY) {
+    if (handle->mode == CBIO_OPEN_RDONLY || ndocs == 0) {
         return CBIO_ERROR_EINVAL;
+    }
+
+    if (cbio_is_local_document(doc[0]->info)) {
+        return cbio_store_local_documents(handle, doc, ndocs);
     }
 
     docs = calloc(ndocs, sizeof(Doc *));

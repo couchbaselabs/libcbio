@@ -34,7 +34,8 @@ check_PROGRAMS = tests/test_open_empty_filename \
                  tests/test_delete_nonexistent_document \
                  tests/test_get_deleted_document \
                  tests/test_bulk_store_documents \
-                 tests/test_changes_since
+                 tests/test_changes_since \
+                 tests/test_local_documents
 
 TESTS=${check_PROGRAMS}
 
@@ -78,6 +79,9 @@ tests_test_changes_since_SOURCES = tests/testapp.c
 tests_test_changes_since_DEPENDENCIES = libcbio.la
 tests_test_changes_since_LDFLAGS = libcbio.la
 
+tests_test_local_documents_SOURCES = tests/testapp.c
+tests_test_local_documents_DEPENDENCIES = libcbio.la
+tests_test_local_documents_LDFLAGS = libcbio.la
 
 LINTFLAGS=-Iinclude -b -c -errchk=%all \
           -erroff=E_INCL_NUSD,E_CAST_INT_TO_SMALL_INT,E_PTRDIFF_OVERFLOW  \

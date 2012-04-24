@@ -27,15 +27,21 @@ libcbio_la_SOURCES = src/document.c src/error.c src/instance.c src/internal.h
 libcbio_la_LDFLAGS = $(AM_LDFLAGS) -lcouchstore \
                      -version-info $(LIBCBIO_API_CURRENT):$(LIBCBIO_API_REVISION):$(LIBCBIO_API_AGE) -no-undefined
 
-check_PROGRAMS = tests/test_open_empty_filename \
-                 tests/test_create_database tests/test_get_miss \
-                 tests/test_store_single_document tests/test_get_hit \
-                 tests/test_delete_document \
-                 tests/test_delete_nonexistent_document \
-                 tests/test_get_deleted_document \
-                 tests/test_bulk_store_documents \
-                 tests/test_changes_since \
-                 tests/test_local_documents
+check_PROGRAMS =
+
+#tests/test_open_empty_filename \
+#                 tests/test_create_database tests/test_get_miss \
+#                 tests/test_store_single_document tests/test_get_hit \
+#                 tests/test_delete_document \
+#                 tests/test_delete_nonexistent_document \
+#                 tests/test_get_deleted_document \
+#                 tests/test_bulk_store_documents \
+#                 tests/test_changes_since \
+#                 tests/test_local_documents
+
+if HAVE_GOOGLETEST
+check_PROGRAMS += tests/gtests
+endif
 
 TESTS=${check_PROGRAMS}
 
@@ -82,6 +88,12 @@ tests_test_changes_since_LDFLAGS = libcbio.la
 tests_test_local_documents_SOURCES = tests/testapp.c
 tests_test_local_documents_DEPENDENCIES = libcbio.la
 tests_test_local_documents_LDFLAGS = libcbio.la
+
+
+tests_gtests_SOURCES = tests/gtests.cc
+tests_gtests_DEPENDENCIES = libcbio.la
+tests_gtests_LDFLAGS = -lgtest libcbio.la
+
 
 LINTFLAGS=-Iinclude -b -c -errchk=%all \
           -erroff=E_INCL_NUSD,E_CAST_INT_TO_SMALL_INT,E_PTRDIFF_OVERFLOW  \

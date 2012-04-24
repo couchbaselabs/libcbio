@@ -20,6 +20,7 @@ AC_CONFIG_SRCDIR([src/internal.h])
 AC_CONFIG_AUX_DIR(config)
 AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE(subdir-objects)
+AC_PROG_CXX
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_LN_S
@@ -42,6 +43,25 @@ AC_SUBST(LIBCBIO_API_CURRENT)
 AC_SUBST(LIBCBIO_API_REVISION)
 AC_SUBST(LIBCBIO_API_AGE)
 
+AC_CACHE_CHECK([for gtest], [ac_cv_have_gtest], [
+  AC_LANG_PUSH([C++])
+  SAVED_LIBS="$LIBS"
+  LIBS="-lgtest"
+  AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM(
+      [
+#include "gtest/gtest.h"
+      ],
+      [
+return 0;
+      ])],
+    [ac_cv_have_gtest=yes],
+    [ac_cv_have_gtest=no])
+  AC_LANG_POP([C++])
+  LIBS="$SAVED_LIBS"
+])
+
+AM_CONDITIONAL(HAVE_GOOGLETEST, [test "$ac_cv_have_gtest" = "yes"])
 AC_CHECK_HEADERS_ONCE([libcouchstore/couch_common.h])
 
 AS_IF([test "x$ac_cv_header_libcouchstore_couch_common_h" != "xyes"],
